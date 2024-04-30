@@ -1,15 +1,65 @@
-// Complete the Index page component here
-// Use chakra-ui
-import { Button } from "@chakra-ui/react"; // example
-import { FaPlus } from "react-icons/fa"; // example - use react-icons/fa for icons
+import { useState } from 'react';
+import { Box, Button, Input, Textarea, SimpleGrid, useToast } from '@chakra-ui/react';
+import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
+
+const Note = ({ note, onDelete, onEdit }) => (
+  <Box borderWidth="1px" borderRadius="lg" p={4} shadow="md">
+    <Input value={note.title} isReadOnly />
+    <Textarea value={note.content} isReadOnly mt={2} />
+    <Button leftIcon={<FaTrash />} colorScheme="red" size="sm" onClick={() => onDelete(note.id)} mt={2}>
+      Delete
+    </Button>
+    <Button leftIcon={<FaEdit />} colorScheme="teal" size="sm" onClick={() => onEdit(note)} mt={2} ml={2}>
+      Edit
+    </Button>
+  </Box>
+);
 
 const Index = () => {
-  // TODO: Create the website here!
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState({ title: '', content: '' });
+  const toast = useToast();
+
+  const handleAddNote = () => {
+    if (!newNote.title || !newNote.content) {
+      toast({
+        title: "Error",
+        description: "Both title and content are required to add a note.",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+    setNotes([...notes, { ...newNote, id: Date.now() }]);
+    setNewNote({ title: '', content: '' });
+  };
+
+  const handleDeleteNote = (id) => {
+    setNotes(notes.filter(note => note.id !== id));
+  };
+
+  const handleEditNote = (note) => {
+    setNewNote(note);
+    handleDeleteNote(note.id);
+  };
+
   return (
-    <Button>
-      Hello world! <FaPlus />
-    </Button>
-  ); // example
+    <Box p={5}>
+      <Box mb={4}>
+        <Input placeholder="Title" value={newNote.title} onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} />
+        <Textarea placeholder="Content" value={newNote.content} onChange={(e) => setNewNote({ ...newNote, content: e.target.value })} mt={2} />
+        <Button leftIcon={<FaPlus />} colorScheme="blue" onClick={handleAddNote} mt={2}>
+          Add Note
+        </Button>
+      </Box>
+      <SimpleGrid columns={3} spacing={4}>
+        {notes.map(note => (
+          <Note key={note.id} note={note} onDelete={handleDeleteNote} onEdit={handleEditNote} />
+        ))}
+      </SimpleGrid>
+    </Box>
+  );
 };
 
 export default Index;
