@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Input, Textarea, SimpleGrid, useToast } from '@chakra-ui/react';
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 
@@ -20,6 +20,11 @@ const Index = () => {
   const [newNote, setNewNote] = useState({ title: '', content: '' });
   const toast = useToast();
 
+  useEffect(() => {
+    const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+    setNotes(savedNotes);
+  }, []);
+
   const handleAddNote = () => {
     if (!newNote.title || !newNote.content) {
       toast({
@@ -31,12 +36,16 @@ const Index = () => {
       });
       return;
     }
-    setNotes([...notes, { ...newNote, id: Date.now() }]);
+    const updatedNotes = [...notes, { ...newNote, id: Date.now() }];
+    setNotes(updatedNotes);
+    localStorage.setItem('notes', JSON.stringify(updatedNotes));
     setNewNote({ title: '', content: '' });
   };
 
   const handleDeleteNote = (id) => {
-    setNotes(notes.filter(note => note.id !== id));
+    const updatedNotes = notes.filter(note => note.id !== id);
+    setNotes(updatedNotes);
+    localStorage.setItem('notes', JSON.stringify(updatedNotes));
   };
 
   const handleEditNote = (note) => {
