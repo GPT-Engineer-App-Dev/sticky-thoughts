@@ -21,8 +21,13 @@ const Index = () => {
   const toast = useToast();
 
   useEffect(() => {
-    const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-    setNotes(savedNotes);
+    try {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      setNotes(savedNotes);
+    } catch (error) {
+      console.error('Failed to load notes from local storage:', error);
+      setNotes([]);
+    }
   }, []);
 
   const handleAddNote = () => {
@@ -36,16 +41,25 @@ const Index = () => {
       });
       return;
     }
-    const updatedNotes = [...notes, { ...newNote, id: Date.now() }];
+    const newNoteWithId = { ...newNote, id: Date.now() };
+    const updatedNotes = [...notes, newNoteWithId];
     setNotes(updatedNotes);
-    localStorage.setItem('notes', JSON.stringify(updatedNotes));
+    try {
+      localStorage.setItem('notes', JSON.stringify(updatedNotes));
+    } catch (error) {
+      console.error('Failed to save notes to local storage:', error);
+    }
     setNewNote({ title: '', content: '' });
   };
 
   const handleDeleteNote = (id) => {
     const updatedNotes = notes.filter(note => note.id !== id);
     setNotes(updatedNotes);
-    localStorage.setItem('notes', JSON.stringify(updatedNotes));
+    try {
+      localStorage.setItem('notes', JSON.stringify(updatedNotes));
+    } catch (error) {
+      console.error('Failed to update local storage after deleting a note:', error);
+    }
   };
 
   const handleEditNote = (note) => {
